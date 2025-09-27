@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@arcjet/inspect": "^1.0.0-beta.12",
+    "@arcjet/next": "^1.0.0-beta.12",
     "@clerk/clerk-react": "^5.48.1",
     "@clerk/nextjs": "^6.32.2",
     "@clerk/shared": "^3.26.1",
