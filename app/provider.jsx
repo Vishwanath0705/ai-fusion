@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from './_components/AppSidebar'
@@ -7,12 +7,17 @@ import AppHeader from './_components/AppHeader'
 import { useUser } from '@clerk/clerk-react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/config/FirestoreConfig'
+import { AiSelectedModelContext } from "@/context/aiSelectedModelContext";
+import { DefaultModel } from './shared/AiModelsShared'
+import { UserDetailsContext } from '@/context/UserDetailsContext'
 
 function provider({
     children,
     ...props
 }) {
     const { user } = useUser();
+    const [aiSelectedModels, setAiSelectedModels] = useState(DefaultModel);
+    const [userDetail, setUserDetail] = useState();
 
     useEffect(() => {
         if (user) {
@@ -24,6 +29,9 @@ function provider({
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
             console.log("Existing user..");
+            const userInfo = userSnap.data();
+            setAiSelectedModels(userInfo?.selectedModelPref);
+            setUserDetail(userInfo);
             return;
         } else {
             const userData = {
@@ -36,6 +44,7 @@ function provider({
             }
             await setDoc(userRef, userData);
             console.log("New user data Saved");
+            setUserDetail(userData);
         }
 
 
@@ -46,15 +55,19 @@ function provider({
             enableSystem
             disableTransitionOnChange
             {...props}>
-            <SidebarProvider>
-                <AppSidebar />
+            <UserDetailsContext.Provider value={{ userDetail, setUserDetail }}>
+                <AiSelectedModelContext.Provider value={{ aiSelectedModels, setAiSelectedModels }}>
+                    <SidebarProvider>
+                        <AppSidebar />
 
 
-                <div className='w-full'>
-                    <AppHeader />
-                    {children}
-                </div>
-            </SidebarProvider>
+                        <div className='w-full'>
+                            <AppHeader />
+                            {children}
+                        </div>
+                    </SidebarProvider>
+                </AiSelectedModelContext.Provider>
+            </UserDetailsContext.Provider>
         </NextThemesProvider>
     )
 }

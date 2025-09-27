@@ -1,0 +1,19 @@
+import arcjet from "@arcjet/next";
+import { tokenBucket } from "@arcjet/next";
+
+export const aj = arcjet({
+
+    key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+    rules: [
+        tokenBucket({
+            mode: "LIVE",
+            characteristics: ["userId"],
+            refillRate: 5,
+            interval: 10,
+            capacity: 10,
+        }),
+
+    ],
+
+});
+
